@@ -1,77 +1,42 @@
-package controler
+package controllers
 
 import (
 	"fmt"
-	"strconv"
+
+	"order-ops/dtos"
+	"order-ops/services"
+
+	"order-ops/utils"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/hongminhcbg/test/gin-mysql-redis/daos"
-	"github.com/hongminhcbg/test/gin-mysql-redis/models"
-	"github.com/hongminhcbg/test/gin-mysql-redis/redis"
 )
 
-type Controler struct {
-	Dao   daos.PersonDao
-	Redis redis.RedisPerson
+type Controller struct {
+	OrderService services.OrderService
 }
 
-func (c Controler) HealthCheck(contex *gin.Context) {
+func (c Controller) HealthCheck(contex *gin.Context) {
 	contex.JSON(200, gin.H{
 		"status": "running",
 	})
 }
 
-func (c Controler) CreatePerson(context *gin.Context) {
-	var person models.Person
-	context.ShouldBindJSON(&person)
-	err := c.Dao.Create(&person)
+func (c Controller) AddOrder(ctx *gin.Context) {
+	var request dtos.AddOrderRequest
+	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
-		context.JSON(400, gin.H{
-			"message": "create person error",
-			"errors":  err.Error(),
-		})
-	} else {
-		context.JSON(200, gin.H{
-			"message": "success",
-			"person":  person,
-		})
-	}
-}
-
-func (c Controler) GetPerson(context *gin.Context) {
-	id := context.Query("id")
-	idint, err := strconv.Atoi(id)
-	if err != nil {
-		context.JSON(400, gin.H{
-			"status": "error",
-			"msg":    err.Error(),
-		})
-		return
-	}
-	if data, err := c.Redis.GetPerson(idint); err == nil {
-		context.JSON(200, gin.H{
-			"status": "success",
-			"data":   data,
-		})
+		fmt.Println("bind json error", err)
+		utils.ResponseErrorGin(ctx, "bind json error")
 		return
 	}
 
-	data, err := c.Dao.Read(idint)
+	resp, err := c.OrderService.AddOrder(request)
 	if err != nil {
-		context.JSON(400, gin.H{
-			"status": "error",
-			"msg":    err.Error(),
-		})
-	} else {
-		context.JSON(200, gin.H{
-			"status": "success",
-			"data":   data,
-		})
-		err := c.Redis.Save(data)
-		if err != nil {
-			fmt.Println("save data to cache error")
-		}
+		fmt.Println("add order error", err)
+		utils.ResponseErrorGin(ctx, "add order error")
+		return
 	}
 
+	fmt.Println("add success")
+	utils.ResponseSuccess(ctx, resp)
 }

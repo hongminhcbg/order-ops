@@ -1,18 +1,27 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"order-ops/controllers"
+	"order-ops/services"
 
-	"github.com/hongminhcbg/test/gin-mysql-redis/controler"
-	"github.com/hongminhcbg/test/gin-mysql-redis/daos"
-	"github.com/hongminhcbg/test/gin-mysql-redis/redis"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
-func InitGin(dao daos.PersonDao, redis redis.RedisPerson) *gin.Engine {
-	controler := controler.Controler{Dao: dao, Redis: redis}
+func InitGin(db *gorm.DB) *gin.Engine {
+	orderService := services.NewOrderService()
+	ctl := controllers.Controller{
+		OrderService: orderService,
+	}
+
 	engine := gin.Default()
-	engine.GET("/health-check", controler.HealthCheck)
-	engine.POST("/person", controler.CreatePerson)
-	engine.GET("/person", controler.GetPerson)
+	engine.GET("/health", ctl.HealthCheck)
+	apiGroup := engine.Group("/api/v1")
+	{
+		orderGroup := apiGroup.Group("/orders")
+		{
+			orderGroup.POST("", ctl.AddOrder)
+		}
+	}
 	return engine
 }
