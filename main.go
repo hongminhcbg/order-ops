@@ -29,5 +29,5 @@ func main() {
 
 	// RedisCache := my_redis.NewRedisPerson(client)
 	engine := InitGin(db)
-	_ = engine.Run(":8080")
+	_ = engine.Run(":80")
 }
