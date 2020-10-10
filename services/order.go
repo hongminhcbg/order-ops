@@ -1,42 +1,180 @@
 package services
 
 import (
+	"order-ops/daos"
 	"order-ops/dtos"
-
-	"github.com/pkg/errors"
+	"order-ops/models"
+	"time"
 )
 
 type OrderService interface {
 	AddOrder(request dtos.AddOrderRequest) (*dtos.AddorderResponse, error)
 	AddLabelsToOrder(request dtos.AddLabelRequest) (*dtos.AddorderResponse, error)
 	Search(queries []dtos.SearchQuery) ([]dtos.FullOrderInformation, error)
-	AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.FullOrderInformation, error)
-	MakeCompleted(orderNumber string) (*dtos.FullOrderInformation, error)
+	AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.AddorderResponse, error)
+	MakeCompleted(orderNumber string) (*dtos.AddorderResponse, error)
 }
 
 type orderServiceImpl struct {
+	dao daos.OrderDao
 }
 
-func NewOrderService() OrderService {
-	return &orderServiceImpl{}
+func NewOrderService(dao daos.OrderDao) OrderService {
+	return &orderServiceImpl{
+		dao: dao,
+	}
+}
+
+const CommonTimeFormat = "2006-01-02 15:04:05"
+const (
+	processingStatus = 0
+	shippingStatus   = 1
+	holdOnStatus     = 2
+	completedStatus  = 3
+)
+
+func (service *orderServiceImpl) mapperDtossToModelOrder(input dtos.Order) models.Order {
+	return models.Order{
+		OrderNumber:  input.OrderNumber,
+		CustomerName: input.Name,
+		Quantiny:     input.Quantiny,
+		Phone:        input.Phone,
+		Address1:     input.Address1,
+		Address2:     input.Address2,
+		City:         input.City,
+		State:        input.State,
+		PostalCode:   input.PostalCode,
+		Country:      input.Country,
+		Note:         input.Note,
+	}
+}
+
+func (service *orderServiceImpl) mapperDtossToModelOrderAddLable(input dtos.AddLabelRequest) models.Order {
+	return models.Order{
+		OrderNumber:           input.OrderNumber,
+		TrackingNumber:        input.LableDetails.TrackingNumber,
+		URL:                   input.LableDetails.URL,
+		PartnerTrackingNumber: input.LableDetails.PartnerTrackingNumber,
+	}
 }
 
 func (service *orderServiceImpl) AddOrder(request dtos.AddOrderRequest) (*dtos.AddorderResponse, error) {
-	return nil, errors.New("not implement")
+	recordSuccess := make([]string, 0)
+	recordFail := make([]string, 0)
+	for _, order := range request.Orders {
+		record := service.mapperDtossToModelOrder(order)
+		err := service.dao.Create(&record)
+		if err != nil {
+			recordFail = append(recordFail, order.OrderNumber)
+		} else {
+			recordSuccess = append(recordSuccess, order.OrderNumber)
+		}
+	}
+
+	result := dtos.AddorderResponse{
+		RecordsFailes:  recordFail,
+		RecordsSuccess: recordSuccess,
+	}
+
+	return &result, nil
 }
 
 func (service *orderServiceImpl) AddLabelsToOrder(request dtos.AddLabelRequest) (*dtos.AddorderResponse, error) {
-	return nil, errors.New("not implement")
+	record := service.mapperDtossToModelOrderAddLable(request)
+	err := service.dao.Updates(&record)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.AddorderResponse{
+		ID: record.ID,
+	}, nil
+}
+
+func (service *orderServiceImpl) mapperModelsToOrderFullInfor(input models.Order) dtos.FullOrderInformation {
+	return dtos.FullOrderInformation{
+		dtos.Order{
+			OrderNumber: input.OrderNumber,
+			Name:        input.CustomerName,
+			Quantiny:    input.Quantiny,
+			Phone:       input.Phone,
+			Address1:    input.Address1,
+			Address2:    input.Address2,
+			City:        input.City,
+			State:       input.State,
+			PostalCode:  input.PostalCode,
+			Country:     input.Country,
+			Note:        input.Note,
+		},
+		dtos.ShippingInfor{
+			Status:        input.Status,
+			BeginShipping: input.BeginShipping.Format(CommonTimeFormat),
+			TimeCompleted: input.TimeCompleted.Format(CommonTimeFormat),
+		},
+		dtos.LableDetails{
+			TrackingNumber:        input.TrackingNumber,
+			URL:                   input.URL,
+			PartnerTrackingNumber: input.PartnerTrackingNumber,
+		},
+	}
+}
+
+func (service *orderServiceImpl) updateRecordState(input *models.Order) {
+	if input.BeginShipping.Equal(*input.TimeCompleted) {
+		return
+	}
+
+	now := time.Now()
+	if now.After(*input.BeginShipping) && now.Before(*input.TimeCompleted) {
+		input.Status = shippingStatus
+		return
+	}
+
+	if now.After(*input.BeginShipping) {
+		input.Status = holdOnStatus
+		return
+	}
 }
 
 func (service *orderServiceImpl) Search(queries []dtos.SearchQuery) ([]dtos.FullOrderInformation, error) {
-	return nil, errors.New("not implement")
+	records, _ := service.dao.Search(queries)
+	result := make([]dtos.FullOrderInformation, 0)
+
+	for _, record := range records {
+		service.updateRecordState(&record)
+		result = append(result, service.mapperModelsToOrderFullInfor(record))
+	}
+
+	return result, nil
 }
 
-func (service *orderServiceImpl) AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.FullOrderInformation, error) {
-	return nil, errors.New("not implement")
+func (service *orderServiceImpl) AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.AddorderResponse, error) {
+	record := models.Order{
+		OrderNumber:   request.OrderNumber,
+		BeginShipping: request.BeginShippingReal,
+		TimeCompleted: request.TimeCompletedReal,
+	}
+	err := service.dao.Updates(&record)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.AddorderResponse{
+		ID: record.ID,
+	}, nil
 }
 
-func (service *orderServiceImpl) MakeCompleted(orderNumber string) (*dtos.FullOrderInformation, error) {
-	return nil, errors.New("not implement")
+func (service *orderServiceImpl) MakeCompleted(orderNumber string) (*dtos.AddorderResponse, error) {
+	record := models.Order{
+		OrderNumber: orderNumber,
+		Status:      completedStatus,
+	}
+	err := service.dao.Updates(&record)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.AddorderResponse{
+		ID: record.ID,
+	}, nil
 }

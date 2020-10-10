@@ -8,5 +8,6 @@ require (
 	github.com/hongminhcbg/test/gin-mysql-redis v0.0.0-20200614144457-c6fed63adc54
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 )

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"order-ops/dtos"
 	"order-ops/services"
@@ -62,7 +63,35 @@ func (c Controller) AddLabelToOrder(ctx *gin.Context) {
 }
 
 func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error) {
-	return nil, nil
+	result := make([]dtos.SearchQuery, 0)
+	begin := ctx.Query("begin")
+	if begin != "" {
+		item := dtos.SearchQuery{
+			Key:   "created_at > ?",
+			Value: begin,
+		}
+		result = append(result, item)
+	}
+
+	end := ctx.Query("end")
+	if end != "" {
+		item := dtos.SearchQuery{
+			Key:   "created_at < ?",
+			Value: end,
+		}
+		result = append(result, item)
+	}
+
+	orderNumber := ctx.Query("order_number")
+	if orderNumber != "" {
+		item := dtos.SearchQuery{
+			Key:   "order_number = ?",
+			Value: orderNumber,
+		}
+		result = append(result, item)
+	}
+
+	return result, nil
 }
 
 func (c Controller) Search(ctx *gin.Context) {
@@ -112,6 +141,17 @@ func (c Controller) AddShippingTime(ctx *gin.Context) {
 		utils.ResponseErrorGin(ctx, "bind json error")
 		return
 	}
+
+	begin, err1 := time.Parse(services.CommonTimeFormat, request.BeginShipping)
+	complete, err2 := time.Parse(services.CommonTimeFormat, request.TimeCompleted)
+	if err1 != nil || err2 != nil {
+		fmt.Println("time parser error", err1, err2)
+		utils.ResponseErrorGin(ctx, "time parser error")
+		return
+	}
+
+	request.BeginShippingReal = &begin
+	request.TimeCompletedReal = &complete
 
 	resp, err := c.OrderService.AddShippingTime(request)
 	if err != nil {

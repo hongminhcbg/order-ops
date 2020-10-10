@@ -2,6 +2,7 @@ package main
 
 import (
 	"order-ops/controllers"
+	"order-ops/daos"
 	"order-ops/services"
 
 	"github.com/gin-gonic/gin"
@@ -9,13 +10,25 @@ import (
 )
 
 func CORSMiddleWare() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.Next()
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
 	}
 }
 
 func InitGin(db *gorm.DB) *gin.Engine {
-	orderService := services.NewOrderService()
+	orderDao := daos.NewOrderDao(db)
+	orderService := services.NewOrderService(orderDao)
+
 	ctl := controllers.Controller{
 		OrderService: orderService,
 	}

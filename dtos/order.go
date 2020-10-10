@@ -1,5 +1,7 @@
 package dtos
 
+import "time"
+
 type Meta struct {
 	Code    int    `json:code`
 	Message string `json:message`
@@ -21,6 +23,7 @@ type Order struct {
 	PostalCode  string `json:"postalCode"`
 	Country     string `json:"country"`
 	Phone       string `json:"phone"`
+	Note        string `json:"note"`
 }
 
 type AddOrderRequest struct {
@@ -28,7 +31,9 @@ type AddOrderRequest struct {
 }
 
 type AddorderResponse struct {
-	ID int64 `json:"id"`
+	ID             int64    `json:"id,omitempty"`
+	RecordsSuccess []string `json:"recordsSuccess,omitempty"`
+	RecordsFailes  []string `json:"recordsFailes,omitempty"`
 }
 
 type LableDetails struct {
@@ -48,13 +53,15 @@ type ShippingInfor struct {
 	TimeCompleted string `json:"timeCompleted"`
 }
 type AddShippingTimeRequest struct {
-	OrderNumber   string `json:"orderNumber"`
-	BeginShipping string `json:"beginShipping"`
-	TimeCompleted string `json:"timeCompleted"`
+	OrderNumber       string     `json:"orderNumber"`
+	BeginShipping     string     `json:"beginShipping"`
+	TimeCompleted     string     `json:"timeCompleted"`
+	BeginShippingReal *time.Time `json:"-"`
+	TimeCompletedReal *time.Time `json:"-"`
 }
 
 type FullOrderInformation struct {
-	AddOrderRequest
+	Order
 	ShippingInfor
 	LableDetails LableDetails `json:"lableDetails"`
 }
