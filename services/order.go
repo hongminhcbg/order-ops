@@ -121,7 +121,7 @@ func (service *orderServiceImpl) mapperModelsToOrderFullInfor(input models.Order
 }
 
 func (service *orderServiceImpl) updateRecordState(input *models.Order) {
-	if input.BeginShipping.Equal(*input.TimeCompleted) {
+	if input.BeginShipping.Equal(*input.TimeCompleted) || input.Status == completedStatus {
 		return
 	}
 
