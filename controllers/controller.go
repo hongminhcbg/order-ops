@@ -51,6 +51,39 @@ func (c Controller) AddOrder(ctx *gin.Context) {
 	utils.ResponseSuccess(ctx, resp)
 }
 
+func (c Controller) UpdateOrders(ctx *gin.Context) {
+	var request dtos.Order
+	bytes, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		fmt.Println("get raw body error", err)
+		utils.ResponseErrorGin(ctx, "get raw body error")
+		return
+	}
+
+	err = json.Unmarshal(bytes, &request)
+	if err != nil {
+		fmt.Println("bind json error", err, "raw_body", string(bytes))
+		utils.ResponseErrorGin(ctx, "bind json error")
+		return
+	}
+
+	if request.OrderNumber == "" {
+		fmt.Println("required OrderNumber", "raw_body", string(bytes))
+		utils.ResponseErrorGin(ctx, "required OrderNumber")
+		return
+	}
+
+	resp, err := c.OrderService.Updates(request)
+	if err != nil {
+		fmt.Println("updates order error", err)
+		utils.ResponseErrorGin(ctx, "update order error")
+		return
+	}
+
+	fmt.Println("updates order success", "ID", resp.ID)
+	utils.ResponseSuccess(ctx, resp)
+}
+
 func (c Controller) AddLabelToOrder(ctx *gin.Context) {
 	var request dtos.AddLabelRequest
 	bytes, err := ioutil.ReadAll(ctx.Request.Body)
@@ -116,6 +149,15 @@ func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error)
 		item := dtos.SearchQuery{
 			Key:   "order_number = ?",
 			Value: orderNumber,
+		}
+		result = append(result, item)
+	}
+
+	status := ctx.Query("status")
+	if status != "" {
+		item := dtos.SearchQuery{
+			Key:   "status = ?",
+			Value: status,
 		}
 		result = append(result, item)
 	}

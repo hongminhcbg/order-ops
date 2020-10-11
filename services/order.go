@@ -5,6 +5,8 @@ import (
 	"order-ops/dtos"
 	"order-ops/models"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type OrderService interface {
@@ -14,6 +16,7 @@ type OrderService interface {
 	AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.AddorderResponse, error)
 	MakeCompleted(orderNumber string) (*dtos.AddorderResponse, error)
 	Detete(orderNumber string) error
+	Updates(request dtos.Order) (*dtos.AddorderResponse, error)
 }
 
 type orderServiceImpl struct {
@@ -189,4 +192,14 @@ func (service *orderServiceImpl) MakeCompleted(orderNumber string) (*dtos.Addord
 
 func (service *orderServiceImpl) Detete(orderNumber string) error {
 	return service.dao.Delete(orderNumber)
+}
+
+func (service *orderServiceImpl) Updates(request dtos.Order) (*dtos.AddorderResponse, error) {
+	record := service.mapperDtossToModelOrder(request)
+	err := service.dao.Updates(&record)
+	if err != nil {
+		return nil, errors.Wrap(err, "update record error")
+	}
+
+	return &dtos.AddorderResponse{ID: record.ID}, nil
 }
