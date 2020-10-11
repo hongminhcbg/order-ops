@@ -175,6 +175,21 @@ func Test_orderDaoImpl_Search(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "add status",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				queries: []dtos.SearchQuery{
+					{
+						Key:   "status=?",
+						Value: 3,
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
