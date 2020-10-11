@@ -44,7 +44,7 @@ type LableDetails struct {
 
 type AddLabelRequest struct {
 	OrderNumber  string       `json:"orderNumber"`
-	LableDetails LableDetails `json:"lableDetails"`
+	LableDetails LableDetails `json:"labelDetails"`
 }
 
 type ShippingInfor struct {

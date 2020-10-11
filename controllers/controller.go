@@ -67,6 +67,14 @@ func (c Controller) AddLabelToOrder(ctx *gin.Context) {
 		return
 	}
 
+	if request.LableDetails.PartnerTrackingNumber == "" ||
+		request.LableDetails.TrackingNumber == "" ||
+		request.LableDetails.URL == "" {
+		fmt.Println("require field in label details is missing", request)
+		utils.ResponseErrorGin(ctx, "require field is missing")
+		return
+	}
+
 	resp, err := c.OrderService.AddLabelsToOrder(request)
 	if err != nil {
 		fmt.Println("add labels to order error", err)
