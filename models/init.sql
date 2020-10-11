@@ -16,8 +16,8 @@ CREATE TABLE `orders` (
   `partner_tracking_number` VARCHAR(255) DEFAULT '',
   `status` TINYINT(3) DEFAULT 0,
   `note` VARCHAR(255) DEFAULT '',
-  `begin_shipping` TIMESTAMP DEFAULT NOW(),
-  `time_completed` TIMESTAMP DEFAULT NOW(),
+  `begin_shipping` TIMESTAMP,
+  `time_completed` TIMESTAMP,
   `created_at`                 DATETIME    DEFAULT NOW(),
   `updated_at`                 DATETIME    DEFAULT NOW() ON UPDATE NOW()
   );
@@ -27,3 +27,8 @@ CREATE TABLE `orders` (
     COLLATE = utf8mb4_unicode_ci;
   ALTER TABLE orders
   ADD COLUMN `deleted_at` DATETIME DEFAULT NULL AFTER `updated_at`;
+  ALTER TABLE orders
+  MODIFY `begin_shipping` TIMESTAMP;
+  MODIFY `time_completed` TIMESTAMP;
+  
+  

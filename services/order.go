@@ -93,6 +93,13 @@ func (service *orderServiceImpl) AddLabelsToOrder(request dtos.AddLabelRequest) 
 }
 
 func (service *orderServiceImpl) mapperModelsToOrderFullInfor(input models.Order) dtos.FullOrderInformation {
+	begin := input.BeginShipping.Format(CommonTimeFormat)
+	end := input.TimeCompleted.Format(CommonTimeFormat)
+	if begin == end {
+		begin = ""
+		end = ""
+	}
+
 	return dtos.FullOrderInformation{
 		dtos.Order{
 			OrderNumber: input.OrderNumber,
@@ -109,8 +116,8 @@ func (service *orderServiceImpl) mapperModelsToOrderFullInfor(input models.Order
 		},
 		dtos.ShippingInfor{
 			Status:        input.Status,
-			BeginShipping: input.BeginShipping.Format(CommonTimeFormat),
-			TimeCompleted: input.TimeCompleted.Format(CommonTimeFormat),
+			BeginShipping: begin,
+			TimeCompleted: end,
 		},
 		dtos.LableDetails{
 			TrackingNumber:        input.TrackingNumber,

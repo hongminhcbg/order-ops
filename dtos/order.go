@@ -49,8 +49,8 @@ type AddLabelRequest struct {
 
 type ShippingInfor struct {
 	Status        int32  `json:"status"`
-	BeginShipping string `json:"beginShipping"`
-	TimeCompleted string `json:"timeCompleted"`
+	BeginShipping string `json:"beginShipping,omitempty"`
+	TimeCompleted string `json:"timeCompleted,omitempty"`
 }
 type AddShippingTimeRequest struct {
 	OrderNumber       string     `json:"orderNumber"`
