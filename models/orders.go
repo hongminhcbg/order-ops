@@ -6,7 +6,7 @@ type Order struct {
 	ID                    int64      `gorm:"column:id;AUTO_INCREMENT;PRIMARY_KEY"`
 	OrderNumber           string     `gorm:"column:order_number"`
 	CustomerName          string     `gorm:"column:customer_name"`
-	Quantity              int32      `gorm:"column:quantiny"`
+	Quantity              int32      `gorm:"column:quantity"`
 	Phone                 string     `gorm:"column:phone"`
 	Address1              string     `gorm:"column:address1"`
 	Address2              string     `gorm:"column:address2"`
