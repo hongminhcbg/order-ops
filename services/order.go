@@ -5,6 +5,7 @@ import (
 	"order-ops/daos"
 	"order-ops/dtos"
 	"order-ops/models"
+	"sort"
 	"strconv"
 	"time"
 
@@ -171,6 +172,10 @@ func (service *orderServiceImpl) Search(queries []dtos.SearchQuery) ([]dtos.Full
 			result = append(result, service.mapperModelsToOrderFullInfor(record))
 		}
 	}
+
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Status < result[j].Status
+	})
 
 	return result, nil
 }
