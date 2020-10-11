@@ -126,7 +126,7 @@ func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error)
 		Value: nil,
 	})
 
-	begin := ctx.Query("begin")
+	begin := ctx.Query("begin_time")
 	if begin != "" {
 		item := dtos.SearchQuery{
 			Key:   "created_at > ?",
@@ -135,7 +135,7 @@ func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error)
 		result = append(result, item)
 	}
 
-	end := ctx.Query("end")
+	end := ctx.Query("end_time")
 	if end != "" {
 		item := dtos.SearchQuery{
 			Key:   "created_at < ?",
