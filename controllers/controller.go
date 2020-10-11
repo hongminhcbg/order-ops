@@ -26,9 +26,16 @@ func (c Controller) HealthCheck(contex *gin.Context) {
 
 func (c Controller) AddOrder(ctx *gin.Context) {
 	var request dtos.AddOrderRequest
-	err := ctx.ShouldBindJSON(&request)
+	bytes, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
-		fmt.Println("bind json error", err)
+		fmt.Println("get raw body error", err)
+		utils.ResponseErrorGin(ctx, "get raw body error")
+		return
+	}
+
+	err = json.Unmarshal(bytes, &request)
+	if err != nil {
+		fmt.Println("bind json error", err, "raw_body", string(bytes))
 		utils.ResponseErrorGin(ctx, "bind json error")
 		return
 	}
