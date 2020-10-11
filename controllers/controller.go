@@ -156,7 +156,7 @@ func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error)
 	status := ctx.Query("status")
 	if status != "" {
 		item := dtos.SearchQuery{
-			Key:   "status = ?",
+			Key:   "status=?",
 			Value: status,
 		}
 		result = append(result, item)

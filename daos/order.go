@@ -42,6 +42,10 @@ func (dao *orderDaoImpl) Search(queries []dtos.SearchQuery) ([]models.Order, err
 	result := make([]models.Order, 0)
 	db := dao.db
 	for _, query := range queries {
+		if query.Key == "status=?" {
+			continue
+		}
+
 		if query.Value != nil {
 			db = db.Where(query.Key, query.Value)
 		} else {

@@ -183,7 +183,7 @@ func Test_orderDaoImpl_Search(t *testing.T) {
 			args: args{
 				queries: []dtos.SearchQuery{
 					{
-						Key:   "status=?",
+						Key:   "status = ?",
 						Value: 0,
 					},
 				},
