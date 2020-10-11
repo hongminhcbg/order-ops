@@ -88,6 +88,11 @@ func (c Controller) AddLabelToOrder(ctx *gin.Context) {
 
 func (c Controller) getSearchQuery(ctx *gin.Context) ([]dtos.SearchQuery, error) {
 	result := make([]dtos.SearchQuery, 0)
+	result = append(result, dtos.SearchQuery{
+		Key:   "deleted_at IS NULL",
+		Value: nil,
+	})
+
 	begin := ctx.Query("begin")
 	if begin != "" {
 		item := dtos.SearchQuery{
@@ -148,13 +153,31 @@ func (c Controller) MakeDone(ctx *gin.Context) {
 
 	resp, err := c.OrderService.MakeCompleted(request.OrderNumber)
 	if err != nil {
-		fmt.Println("add labels to order error", err)
-		utils.ResponseErrorGin(ctx, "add labels to order error")
+		fmt.Println("make order done error", err)
+		utils.ResponseErrorGin(ctx, "make order done error")
 		return
 	}
 
-	fmt.Println("add labels to order success")
+	fmt.Println("make order done success")
 	utils.ResponseSuccess(ctx, resp)
+}
+
+func (c Controller) Delete(ctx *gin.Context) {
+	orderNumber := ctx.Query("order_number")
+	if orderNumber == "" {
+		utils.ResponseSuccess(ctx, nil)
+		return
+	}
+
+	err := c.OrderService.Detete(orderNumber)
+	if err != nil {
+		fmt.Println("delete order error", err)
+		utils.ResponseErrorGin(ctx, "delete order error")
+		return
+	}
+
+	fmt.Println("delete order success")
+	utils.ResponseSuccess(ctx, nil)
 }
 
 func (c Controller) AddShippingTime(ctx *gin.Context) {
