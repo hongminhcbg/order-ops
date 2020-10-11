@@ -15,7 +15,7 @@ type Order struct {
 	OrderNumber string `json:"orderNumber"`
 	Name        string `json:"name"`
 	Item        string `json:"item"`
-	Quantiny    int32  `json:"quantiny"`
+	Quantity    int32  `json:"quantity"`
 	Address1    string `json:"address1"`
 	Address2    string `json:"address2"`
 	City        string `json:"city"`

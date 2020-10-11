@@ -10,6 +10,7 @@ services:
     depends_on:
       - mysql
     image: order-ops:v1.0.0
+    restart: always
     ports:
       - "8080:80"
     healthcheck:
@@ -20,11 +21,16 @@ services:
       start_period: 40s
     environment:
       - MYSQL_CONNECT_URL=root:bW90aGVyIGZ1Y2tlciBub29i@tcp(mysql:3306)/orders?charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local
+    networks:
+      - backend
   mysql:
     image: mysql:5.7
+    restart: always
     container_name: mysql-cm
     volumes:
-    - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+    networks:
+      - backend
     ports:
       - "3307:3306"
     environment:
@@ -36,3 +42,6 @@ volumes:
   db_data:
     name: order_mysql
     external: true
+networks:
+  backend:
+      driver: bridge

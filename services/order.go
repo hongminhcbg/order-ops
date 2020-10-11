@@ -37,7 +37,7 @@ func (service *orderServiceImpl) mapperDtossToModelOrder(input dtos.Order) model
 	return models.Order{
 		OrderNumber:  input.OrderNumber,
 		CustomerName: input.Name,
-		Quantiny:     input.Quantiny,
+		Quantity:     input.Quantity,
 		Phone:        input.Phone,
 		Address1:     input.Address1,
 		Address2:     input.Address2,
@@ -96,7 +96,7 @@ func (service *orderServiceImpl) mapperModelsToOrderFullInfor(input models.Order
 		dtos.Order{
 			OrderNumber: input.OrderNumber,
 			Name:        input.CustomerName,
-			Quantiny:    input.Quantiny,
+			Quantity:    input.Quantity,
 			Phone:       input.Phone,
 			Address1:    input.Address1,
 			Address2:    input.Address2,
