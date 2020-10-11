@@ -41,7 +41,7 @@ func Test_orderDaoImpl_Create(t *testing.T) {
 			args: args{
 				record: &models.Order{
 					OrderNumber:  uuid.New(),
-					Quantiny:     1,
+					Quantity:     1,
 					CustomerName: "minh",
 					Phone:        "011",
 				},
@@ -160,16 +160,77 @@ func Test_orderDaoImpl_Search(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "delete",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				queries: []dtos.SearchQuery{
+					{
+						Key:   "deleted_at IS NULL",
+						Value: nil,
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dao := &orderDaoImpl{
 				db: tt.fields.db,
 			}
-			_, err := dao.Search(tt.args.queries)
+			got, err := dao.Search(tt.args.queries)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("orderDaoImpl.Search() error = %v, wantErr %v", err, tt.wantErr)
+				t.Log(got)
 				return
+			}
+		})
+	}
+}
+
+func Test_orderDaoImpl_Delete(t *testing.T) {
+	db := getDBCLocal()
+	type fields struct {
+		db *gorm.DB
+	}
+	type args struct {
+		orderNumber string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "record not found",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				orderNumber: "123",
+			},
+		},
+		{
+			name: "normal case",
+			fields: fields{
+				db: db,
+			},
+			args: args{
+				orderNumber: "c5f9c4cd-0f0c-4d89-80fb-dfbec5a77986",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dao := &orderDaoImpl{
+				db: tt.fields.db,
+			}
+			if err := dao.Delete(tt.args.orderNumber); (err != nil) != tt.wantErr {
+				t.Errorf("orderDaoImpl.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

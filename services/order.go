@@ -13,6 +13,7 @@ type OrderService interface {
 	Search(queries []dtos.SearchQuery) ([]dtos.FullOrderInformation, error)
 	AddShippingTime(request dtos.AddShippingTimeRequest) (*dtos.AddorderResponse, error)
 	MakeCompleted(orderNumber string) (*dtos.AddorderResponse, error)
+	Detete(orderNumber string) error
 }
 
 type orderServiceImpl struct {
@@ -177,4 +178,8 @@ func (service *orderServiceImpl) MakeCompleted(orderNumber string) (*dtos.Addord
 	return &dtos.AddorderResponse{
 		ID: record.ID,
 	}, nil
+}
+
+func (service *orderServiceImpl) Detete(orderNumber string) error {
+	return service.dao.Delete(orderNumber)
 }

@@ -25,3 +25,5 @@ CREATE TABLE `orders` (
     orders
     CHARACTER SET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
+  ALTER TABLE orders
+  ADD COLUMN `deleted_at` DATETIME DEFAULT NULL AFTER `updated_at`;
