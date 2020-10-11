@@ -19,9 +19,7 @@ services:
       retries: 3
       start_period: 40s
     environment:
-      - MYSQL_URL=root:bW90aGVyIGZ1Y2tlciBub29i@tcp(mysql:3306)/orders?charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local
-      - API_KEY=hongminh229297
-      - SECRET_KEY=hongminh229297
+      - MYSQL_CONNECT_URL=root:bW90aGVyIGZ1Y2tlciBub29i@tcp(mysql:3306)/orders?charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local
   mysql:
     image: mysql:5.7
     container_name: mysql-cm
@@ -36,5 +34,5 @@ services:
       MYSQL_PASSWORD: 1
 volumes:
   db_data:
-    name: controlmoney_db_data
+    name: order_mysql
     external: true

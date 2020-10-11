@@ -8,9 +8,9 @@ RUN go mod download
 
 RUN GOOS=linux
 
-RUN go build -o main ./main.go
+RUN go build -o main
 
-FROM alpine:latest
+FROM ubuntu:16.04
 
 WORKDIR /app
 

@@ -21,3 +21,7 @@ CREATE TABLE `orders` (
   `created_at`                 DATETIME    DEFAULT NOW(),
   `updated_at`                 DATETIME    DEFAULT NOW() ON UPDATE NOW()
   );
+  ALTER TABLE
+    orders
+    CHARACTER SET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
