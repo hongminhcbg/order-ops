@@ -1,9 +1,11 @@
 package services
 
 import (
+	"fmt"
 	"order-ops/daos"
 	"order-ops/dtos"
 	"order-ops/models"
+	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -150,10 +152,24 @@ func (service *orderServiceImpl) updateRecordState(input *models.Order) {
 func (service *orderServiceImpl) Search(queries []dtos.SearchQuery) ([]dtos.FullOrderInformation, error) {
 	records, _ := service.dao.Search(queries)
 	result := make([]dtos.FullOrderInformation, 0)
+	status := -1
+
+	for _, query := range queries {
+		if query.Key == "status=?" {
+			statusint, _ := strconv.Atoi(fmt.Sprintf("%v", query.Value))
+			status = statusint
+		}
+	}
 
 	for _, record := range records {
 		service.updateRecordState(&record)
-		result = append(result, service.mapperModelsToOrderFullInfor(record))
+		if status != -1 {
+			if int(record.Status) == status {
+				result = append(result, service.mapperModelsToOrderFullInfor(record))
+			}
+		} else {
+			result = append(result, service.mapperModelsToOrderFullInfor(record))
+		}
 	}
 
 	return result, nil

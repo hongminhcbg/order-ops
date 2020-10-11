@@ -30,5 +30,6 @@ CREATE TABLE `orders` (
   ALTER TABLE orders
   MODIFY `begin_shipping` TIMESTAMP;
   MODIFY `time_completed` TIMESTAMP;
-  
+  ALTER TABLE orders.orders MODIFY COLUMN note VARCHAR(255)  
+    CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
   
